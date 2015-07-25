@@ -90,12 +90,10 @@ validateArg "$DYN_DOMAIN" "dyndomain"
 # Done parsing/validating arguments
 
 
-
 if [ -n "$EXPLICIT_IP" ]; then
 
   externalIpArg="&i=${EXPLICIT_IP}"
 
-# If we are supposed to detect ip, do that before we issue the request to gratisdns.dk
 elif [ -n "$DETECT_IP" ]; then
   # Verify presence of dig command and provide advice if it is missing
 
@@ -126,7 +124,8 @@ EndOfError
 fi
 
 
-# Done detecting external ip
+# Time to submit the request
+
 
 baseUrl="https://ssl.gratisdns.dk/ddns.phtml"
 gratisdnsUrl="${baseUrl}?u=${DDNSUSER}&p=${PASSWORD}&d=${ACCOUNT_DOMAIN}&h=${DYN_DOMAIN}${externalIpArg}"
