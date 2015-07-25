@@ -1,5 +1,9 @@
 #!/bin/bash
 
+scriptDir=$( cd "$(dirname "$0")" ; pwd -P )
+scriptPath="${scriptDir}/$(basename "$0")"
+crondPath="/etc/cron.d/1gratisddns"
+
 function usage {
 cat << EndOfUsage
 
@@ -24,6 +28,12 @@ Optional options:
   -i/--ip <ip address>
     This tells the script to submit the given ip address as a url parameter. This overrules the -t/--detectip
     argument
+
+  -s/--schedule
+    Causes this script to schedule itself for regular runs with the given arguments.
+
+  -c/--cancel
+    Causes this script to unschedule itself
 EndOfUsage
 }
 
@@ -60,6 +70,15 @@ while [[ $# > 0 ]]; do
     EXPLICIT_IP="$2"
     shift # past argument
     ;;
+    -s|--schedule)
+    SCHEDULE=YES
+    shift # past argument
+    ;;
+    -c|--cancel)
+    echo "Cancelling gratisddns schedule (if there was one)"
+    sudo rm "$crondPath"
+    exit
+    ;;
     *)
       # unknown option
       echo "Unknown option: $key" >&2
@@ -76,19 +95,24 @@ function validateArg {
     usage >&2
     exit 2
   fi
-  if [ -n "$2" ]; then
+  if [ -z "$3" ]; then
     echo "$2" = "$1"
   fi
 }
 
 validateArg "$DDNSUSER" "user"
-validateArg "$PASSWORD"
+validateArg "$PASSWORD" "password" "dontprint"
 validateArg "$ACCOUNT_DOMAIN" "accountdomain"
 validateArg "$DYN_DOMAIN" "dyndomain"
 
 
 # Done parsing/validating arguments
 
+if [ -n "$SCHEDULE" ]; then
+  echo "Creating schedule to run this script every three hours and log to /tmp/gratisddns.log"
+  echo "01 0-23/3 * * * $USER $scriptPath -u $DDNSUSER -p $PASSWORD -a $ACCOUNT_DOMAIN -d $DYN_DOMAIN > /tmp/gratisddns.log 2>&1" | sudo tee "$crondPath" >/dev/null
+  exit
+fi
 
 if [ -n "$EXPLICIT_IP" ]; then
 
