@@ -132,5 +132,5 @@ gratisdnsUrl="${baseUrl}?u=${DDNSUSER}&p=${PASSWORD}&d=${ACCOUNT_DOMAIN}&h=${DYN
 
 echo "Initiating request to ${baseUrl}.."
 
-curl "$gratisdnsUrl"
+curl -sS "$gratisdnsUrl"
 
