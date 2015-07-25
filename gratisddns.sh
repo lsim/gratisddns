@@ -89,7 +89,8 @@ if [ -n "$DETECT_IP" ]; then
 
   if ! type "dig" &> /dev/null; then
     cat << EndOfError >&2
-This scripts requires the command 'dig'. You can probably install it in one of the following ways:
+This script requires the command 'dig' when invoked with -i/--detectip. You can probably install it in 
+one of the following ways:
 
 sudo yum install bind-utils
 sudo apt-get install bind-utils
