@@ -17,10 +17,13 @@ Required options:
 
 Optional options:
   
-  -i/--detectip 
-    This tells the script to include our external ip as an explicit url parameter. Using this adds a dependency on
-    the 'dig' command from the 'bind-utils' package. You don't seem to need this.
+  -t/--detectip 
+    This tells the script to include our external ip as a url parameter. Using this adds a dependency on
+    the 'dig' command from the 'bind-utils' package. You dont seem to need this.
 
+  -i/--ip <ip address>
+    This tells the script to submit the given ip address as a url parameter. This overrules the -t/--detectip
+    argument
 EndOfUsage
 }
 
@@ -49,8 +52,12 @@ while [[ $# > 0 ]]; do
     DYN_DOMAIN="$2"
     shift # past argument
     ;;
-    -i|--detectip)
+    -t|--detectip)
     DETECT_IP=YES
+    shift # past argument
+    ;;
+    -i|--ip)
+    EXPLICIT_IP="$2"
     shift # past argument
     ;;
     *)
@@ -83,13 +90,18 @@ validateArg "$DYN_DOMAIN" "dyndomain"
 # Done parsing/validating arguments
 
 
+
+if [ -n "$EXPLICIT_IP" ]; then
+
+  externalIpArg="&i=${EXPLICIT_IP}"
+
 # If we are supposed to detect ip, do that before we issue the request to gratisdns.dk
-if [ -n "$DETECT_IP" ]; then
+elif [ -n "$DETECT_IP" ]; then
   # Verify presence of dig command and provide advice if it is missing
 
   if ! type "dig" &> /dev/null; then
     cat << EndOfError >&2
-This script requires the command 'dig' when invoked with -i/--detectip. You can probably install it in 
+This script requires the command 'dig' when invoked with -t/--detectip. You can probably install it in 
 one of the following ways:
 
 sudo yum install bind-utils
@@ -112,6 +124,7 @@ EndOfError
 
   externalIpArg="&i=${externalIp}"
 fi
+
 
 # Done detecting external ip
 
